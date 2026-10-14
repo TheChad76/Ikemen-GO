@@ -1,1 +1,40 @@
 
+name: Android Test APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Preparar ambiente
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose-plugin
+
+      - name: Compilar APK
+        run: |
+          touch LICENSES.txt
+          ./build/build_android.sh
+
+      - name: Conferir APK
+        run: |
+          test -s bin/ikemen-go.apk
+          ls -lh bin/ikemen-go.apk
+
+      - name: Disponibilizar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ikemen-go-android-test
+          path: bin/ikemen-go.apk
+          if-no-files-found: error
+          retention-days: 7
+          
